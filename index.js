@@ -104,12 +104,59 @@ function handleDeleteTodo(todo) {
 }
 
 
-function handleDeleteGoal(id) {
-  
+function handleDeleteGoal(goal) {
+  return dispatch => {
+    dispatch(removeGoalAction(goal.id));
+    return API.deleteGoal(goal.id).catch(() => {
+      dispatch(addGoalAction(goal))
+      alert('Error occurred ! Try again !')
+    });
+  }
 }
 
-function handleAddGoal(goal) {
-  
+function handleAddGoal(goal, cb) {
+  return dispatch => {
+    return API
+          .saveGoal(goal)
+          .then(goal => {
+            dispatch(addGoalAction(goal));
+            cb();
+          })
+          .catch(() => alert('An Error occured! Try again later!'));
+  }
+}
+
+function handleAddTodo(todo, cb) {
+  return dispatch => {
+    return API
+              .saveTodo(todo)
+              .then(todo => {
+                dispatch(addTodoAction(todo));
+                cb();
+              })
+              .catch(() => alert('An Error occured! Try again later!'));
+  }
+}
+
+function handleToggle(id) {
+  return dispatch => {
+    dispatch(toggleTodoAction(id));
+    return API.saveTodoToggle(id)
+      .catch(() => {
+        dispatch(toggleTodoAction(id));
+        alert('An error occured! Try again !');
+      })
+  }
+}
+
+function handleInitialData() {
+  return dispatch => {
+    return  Promise
+    .all([API.fetchTodos(), API.fetchGoals()])
+    .then(([todos, goals]) => {
+      dispatch(receiveDataAction(todos, goals));
+    });
+  }
 }
 
 function checkAndDispatch(store, action) {
